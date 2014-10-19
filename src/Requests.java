@@ -1,5 +1,12 @@
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Hashtable;
+
+import javax.net.ssl.HttpsURLConnection;
+
 
 import android.os.AsyncTask;
 
@@ -24,23 +31,45 @@ public class Requests extends AsyncTask<Hashtable<String,String>,String,Void>{
 	 */
 	@Override
 	protected Void doInBackground(Hashtable<String,String>... request) {
+		//init connection to site
+		HttpsURLConnection conn = null;
+		try {
+			conn = (HttpsURLConnection) url.openConnection();
+		} catch (IOException e) { e.printStackTrace(); }
+		conn.setReadTimeout(10000);
+		conn.setConnectTimeout(10000);
+	
 		if(request[0].get("REQUEST").equals("POST")) {
-			post(url,request[1], request[2]);
+			try {
+				post(conn,request[1], request[2]);
+			} catch (IOException e) {}
 		} else if (request[1].get("REQUEST").equals("GET")) {
-			get(url,request[1]);
+			get(conn,request[1]);
 		}
 		return null;
 	}
 	//POST request
-	private void post(URL url, Hashtable<String,String> headers, 
-			Hashtable<String,String> content)
+	private void post(HttpsURLConnection conn, Hashtable<String,String> headers, 
+			Hashtable<String,String> content) throws IOException
 	{
+		//setup connection for POST
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setRequestMethod("POST");
+		//Writer to connection
+		OutputStream os = conn.getOutputStream();
+		BufferedWriter writer = new BufferedWriter(
+		        new OutputStreamWriter(os, "UTF-8"));
+		//iterate over headers
+		for(String headerKey : headers.keySet()) {
+			conn.setRequestProperty(headerKey, headers.get(headerKey));
+		}
 		
 		
 	}
 	
 	//GET request
-	private void get(URL url, Hashtable<String,String> headers)
+	private void get(HttpsURLConnection conn, Hashtable<String,String> headers)
 	{
 		
 	}
