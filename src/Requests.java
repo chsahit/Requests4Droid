@@ -2,7 +2,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Hashtable;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -64,7 +66,10 @@ public class Requests extends AsyncTask<Hashtable<String,String>,String,Void>{
 		for(String headerKey : headers.keySet()) {
 			conn.setRequestProperty(headerKey, headers.get(headerKey));
 		}
-		
+		writer.write(buildContent(content));
+		writer.flush();
+		writer.close();
+		os.close();
 		
 	}
 	
@@ -75,9 +80,17 @@ public class Requests extends AsyncTask<Hashtable<String,String>,String,Void>{
 	}
 	
 	//adds URL Parameters to a URL and returns it as a URL(not a String)
-	public static URL buildURL(String URL,Hashtable<String,String> params)
+	public String buildContent(Hashtable<String,String> params) 
+			throws UnsupportedEncodingException
 	{
-		return null;
+		String content = "";
+		for(String contentKey : params.keySet()) {
+			if(content.equals(""))
+				content += "&";
+			content += contentKey += "=" + params.get(contentKey);
+		}
+		content = URLEncoder.encode(content,"UTF-8");
+		return content;
 	}
 
 }
