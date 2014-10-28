@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Hashtable;
@@ -46,7 +47,9 @@ public class Requests extends AsyncTask<Hashtable<String,String>,String,Void>{
 				post(conn,request[1], request[2]);
 			} catch (IOException e) {}
 		} else if (request[1].get("REQUEST").equals("GET")) {
-			get(conn,request[1]);
+			try {
+				get(conn,request[1]);
+			} catch (Exception e) {}
 		}
 		return null;
 	}
@@ -74,9 +77,14 @@ public class Requests extends AsyncTask<Hashtable<String,String>,String,Void>{
 	}
 	
 	//GET request
-	private void get(HttpsURLConnection conn, Hashtable<String,String> headers)
+	private void get(HttpsURLConnection conn, Hashtable<String,String> headers) throws IOException
 	{
-		
+		conn.setRequestMethod("GET");
+		conn.setDoInput(true);
+		for(String headerKey : headers.keySet()) {
+			conn.setRequestProperty(headerKey, headers.get(headerKey));
+		}
+		conn.connect();
 	}
 	
 	//adds URL Parameters to a URL and returns it as a URL(not a String)
